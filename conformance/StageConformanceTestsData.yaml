@@ -10,7 +10,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: longhorn
+  storageClassName: openebs-kernel-nfs-scw
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -23,7 +23,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: longhorn
+  storageClassName: openebs-kernel-nfs-scw
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -36,7 +36,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: longhorn
+  storageClassName: openebs-kernel-nfs-scw
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -49,7 +49,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: longhorn
+  storageClassName: openebs-kernel-nfs-scw
 ---
 apiVersion: batch/v1
 kind: Job

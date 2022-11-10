@@ -9,7 +9,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: longhorn
+  storageClassName: openebs-kernel-nfs-scw
 ---
 apiVersion: batch/v1
 kind: Job
@@ -28,7 +28,7 @@ spec:
           name: conformance-output-data-1-0
       containers:
       - name: tests-1-0
-        image: docker.terradue.com/calrissian:conformance
+        image: terradue/calrissian:conformance
         workingDir: "/conformance/common-workflow-language-1.0.2"
         command: ["cwltest"]
         args:
