@@ -284,10 +284,12 @@ class KubernetesPodBuilderTestCase(TestCase):
         self.stdin = 'stdin.txt'
         self.resources = {'cores': 1, 'ram': 1024}
         self.labels = {'key1': 'val1', 'key2': 123}
+        self.nodeselectors = {'disktype': 'ssd', 'cachelevel': 2}
         self.security_context = { 'runAsUser': os.getuid(),'runAsGroup': os.getgid() }
+        self.pod_serviceaccount = "podmanager"
         self.pod_builder = KubernetesPodBuilder(self.name, self.container_image, self.environment, self.volume_mounts,
                                                 self.volumes, self.command_line, self.stdout, self.stderr, self.stdin,
-                                                self.resources, self.labels, self.security_context)
+                                                self.resources, self.labels, self.nodeselectors, self.security_context, self.pod_serviceaccount)
 
     @patch('calrissian.job.random_tag')
     def test_safe_pod_name(self, mock_random_tag):
@@ -345,6 +347,10 @@ class KubernetesPodBuilderTestCase(TestCase):
     def test_string_labels(self):
         self.pod_builder.labels = {'key1': 123}
         self.assertEqual(self.pod_builder.pod_labels(), {'key1':'123'})
+        
+    def test_string_nodeselectors(self):
+        self.pod_builder.nodeselectors = {'cachelevel': 2}
+        self.assertEqual(self.pod_builder.pod_nodeselectors(), {'cachelevel':'2'})
 
     def test_init_containers_empty_when_no_stdout_or_stderr(self):
         self.pod_builder.stdout = None
@@ -420,10 +426,15 @@ class KubernetesPodBuilderTestCase(TestCase):
                 ],
                 'restartPolicy': 'Never',
                 'volumes': self.volumes,
+                'nodeSelector': {
+                    "disktype": "ssd",
+                    "cachelevel": "2"
+                },
                 'securityContext': {
                     'runAsUser': os.getuid(),
                     'runAsGroup': os.getgid()
-                }
+                },
+                'serviceAccountName': 'podmanager'
             }
         }
         self.assertEqual(expected, self.pod_builder.build())
@@ -603,7 +614,7 @@ class CalrissianCommandLineJobTestCase(TestCase):
         job = self.make_job()
         job.outdir = '/outdir'
         job.tmpdir = '/tmpdir'
-        mock_runtime_context = Mock(tmpdir_prefix='TP')
+        mock_runtime_context = Mock(tmpdir_prefix='TP', pod_serviceaccount=None)
         built = job.create_kubernetes_runtime(mock_runtime_context)
         # Adds volume binding for outdir
         self.assertEqual(mock_add_volume_binding.call_args, call('/real/outdir', '/out', True))
@@ -624,7 +635,9 @@ class CalrissianCommandLineJobTestCase(TestCase):
             job.stdin,
             job.builder.resources,
             mock_read_yaml.return_value,
-            job.get_security_context(mock_runtime_context)
+            mock_read_yaml.return_value,
+            job.get_security_context(mock_runtime_context),
+            None
         ))
         # calls builder.build
         # returns that
@@ -785,6 +798,22 @@ class CalrissianCommandLineJobTestCase(TestCase):
         job = self.make_job()
         labels = job.get_pod_labels(mock_runtime_context)
         self.assertEqual(labels, {})
+        
+    @patch('calrissian.job.read_yaml')
+    def test_get_pod_nodeselectors(self, mock_read_yaml, mock_volume_builder, mock_client):
+        expected_nodeselectors = {'disktype':'ssd'}
+        mock_read_yaml.return_value = expected_nodeselectors
+        mock_runtime_context = Mock(pod_nodeselectors='nodeselectors.yaml')
+        job = self.make_job()
+        nodeselectors = job.get_pod_nodeselectors(mock_runtime_context)
+        self.assertEqual(nodeselectors, expected_nodeselectors)
+        self.assertEqual(mock_read_yaml.call_args, call('nodeselectors.yaml'))
+
+    def test_get_pod_nodeselectors_empty(self, mock_volume_builder, mock_client):
+        mock_runtime_context = Mock(pod_nodeselectors=None)
+        job = self.make_job()
+        nodeselectors = job.get_pod_nodeselectors(mock_runtime_context)
+        self.assertEqual(nodeselectors, {})
 
     @patch('calrissian.job.read_yaml')
     def test_get_pod_env_vars(self, mock_read_yaml, mock_volume_builder, mock_client):

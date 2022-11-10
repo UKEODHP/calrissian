@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [v0.11.0] - 2022-11-10
+
+### Added
+
+- adds an argument `--pod-nodeselectors <yaml_file>` to add a node selector for computing pods
+- adda `--pod_serviceaccount` arg to set pods serviceaacount 
+
 ### Changed
 
 - cwltool upgraded to current version 3.1 + all requirements
+- Fixed faulty bytes in log stream (PR #137)
 
 ## [v0.10.0] - 2021-03-31
 
