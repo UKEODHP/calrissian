@@ -9,7 +9,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: openebs-kernel-nfs-scw
 
 ---
 apiVersion: batch/v1
@@ -39,6 +38,7 @@ spec:
         - "calrissian"
         - "--badgedir"
         - "/output/badges-1.2.1_proposed"
+        - "--verbose"
         - "--"
         - "--max-ram"
         - "8G"

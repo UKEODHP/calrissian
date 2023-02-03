@@ -5,12 +5,10 @@ metadata:
   name: conformance-test-data-1-0
 spec:
   accessModes:
-    #- ReadWriteOnce
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: openebs-kernel-nfs-scw
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -18,12 +16,10 @@ metadata:
   name: conformance-test-data-1-1
 spec:
   accessModes:
-    #- ReadWriteOnce
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: openebs-kernel-nfs-scw
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -31,12 +27,10 @@ metadata:
   name: conformance-test-data-1-2
 spec:
   accessModes:
-    #- ReadWriteOnce
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: openebs-kernel-nfs-scw
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -44,12 +38,10 @@ metadata:
   name: conformance-test-data-1-2-1
 spec:
   accessModes:
-    #- ReadWriteOnce
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: openebs-kernel-nfs-scw
 ---
 apiVersion: batch/v1
 kind: Job

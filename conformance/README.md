@@ -123,6 +123,12 @@ Calrissian does not include cwltest, so build a container that installs it.
 
 This will build `calrissian:conformance` from the current source tree. You may need to tag that differently if pushing to a registry. If so, update the `image: ` in [ConformanceTestsJob-1.2.yaml](ConformanceTestsJob-1.2.yaml)
 
+#### Pushing the container on Minikube
+
+```
+minikube image load calrissian:conformance
+```
+
 ### Running Conformance Tests
 
 [ConformanceTestsJob-1.2.yaml](ConformanceTestsJob-1.2.yaml) uses `cwltest` from cwltool to run conformance tests with `--tool calrissian` and Calrissian's required arguments after `--`.

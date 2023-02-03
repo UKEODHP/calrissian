@@ -9,7 +9,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: openebs-kernel-nfs-scw
 
 ---
 apiVersion: batch/v1
@@ -29,7 +28,7 @@ spec:
           name: conformance-output-data-1-2
       containers:
       - name: tests-1-2
-        image: terradue/calrissian:conformance
+        image: calrissian:conformance
         workingDir: "/conformance/cwl-v1.2-1.2.0"
         command: ["cwltest"]
         args:
@@ -51,6 +50,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        - name: RETRY_ATTEMPTS
+          value: "1"
         - name: TMPDIR
           value: "/output"
         volumeMounts:
