@@ -6,5 +6,6 @@ calrissian/__pycache__/
 calrissian.egg-info/
 tests/__pycache__/
 .vscode
-build
 env37
+build
+*.egg
