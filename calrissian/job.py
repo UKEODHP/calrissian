@@ -119,6 +119,10 @@ class KubernetesVolumeBuilder(object):
         inspector = KubernetesPodVolumeInspector(pod)
         for mount_path, sub_path, claim_name, read_only in inspector.get_mounted_persistent_volumes():
             self.add_persistent_volume_entry(mount_path, sub_path, claim_name, read_only)
+            # If the mount path is for a workspace, mount the volume to the workspace-data directory
+            if mount_path.startswith("/workspaces"):
+                log.info("Adding volume binding for workspace-data directory")
+                self.add_volume_binding(mount_path, "/workspace-data", False)
 
     def add_persistent_volume_entry(self, prefix, sub_path, claim_name, read_only):
         entry = {
