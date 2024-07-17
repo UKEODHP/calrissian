@@ -120,7 +120,7 @@ class KubernetesVolumeBuilder(object):
         for mount_path, sub_path, claim_name, read_only in inspector.get_mounted_persistent_volumes():
             self.add_persistent_volume_entry(mount_path, sub_path, claim_name, read_only)
             # If the mount path is for a workspace, mount the volume to this job at the same mount path
-            if mount_path.startswith("/workspaces"):
+            if mount_path.startswith("/workspaces"): # TODO: make this more general in case prefix is changed
                 log.info("Adding volume mount for workspace data")
                 self.add_volume_binding(mount_path, mount_path, False)
 
