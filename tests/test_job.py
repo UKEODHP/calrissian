@@ -195,7 +195,7 @@ class KubernetesVolumeBuilderTestCase(TestCase):
         mock_kubernetes_pod_inspector.return_value.get_mounted_persistent_volumes.return_value = [
             ('/tmp/data1', None, 'data1-claim', False),
             ('/tmp/data2', '/basedir', 'data2-claim', False),
-            ('/workspaces/data3', None, 'data3-claim', False),
+            ('/workspaces/workspace-name', None, 'data3-claim', False),
         ]
 
         mock_kubernetes_volume_builder.find_persistent_volume.return_value = {
@@ -209,7 +209,7 @@ class KubernetesVolumeBuilderTestCase(TestCase):
         self.volume_builder.add_persistent_volume_entries_from_pod('some-pod-data')
 
         pv_entries = self.volume_builder.persistent_volume_entries
-        self.assertEqual(pv_entries.keys(), set(['/tmp/data1', '/tmp/data2', '/workspaces/data3']))
+        self.assertEqual(pv_entries.keys(), set(['/tmp/data1', '/tmp/data2', '/workspaces/workspace-name']))
         expected_entry1 = {
             'prefix': '/tmp/data1',
             'subPath': None,
@@ -233,7 +233,7 @@ class KubernetesVolumeBuilderTestCase(TestCase):
             }
         }
         expected_entry3 = {
-            'prefix': '/workspaces/data3',
+            'prefix': '/workspaces/workspace-name',
             'subPath': None,
             'volume': {
                 'name': 'data3-claim',
@@ -245,13 +245,13 @@ class KubernetesVolumeBuilderTestCase(TestCase):
         }
         expected_entry3_volume_mount = {
             'name': 'data3-claim',
-            'mountPath': "/workspace-data",
+            'mountPath': "/workspaces/workspace-name",
             'subPath': "",
             'readOnly': True
         }
         self.assertEqual(pv_entries['/tmp/data1'], expected_entry1)
         self.assertEqual(pv_entries['/tmp/data2'], expected_entry2)
-        self.assertEqual(pv_entries['/workspaces/data3'], expected_entry3)
+        self.assertEqual(pv_entries['/workspaces/workspace-name'], expected_entry3)
 
         volumes = self.volume_builder.volumes
         self.assertEqual(len(volumes), 3)
