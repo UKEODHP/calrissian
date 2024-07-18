@@ -119,9 +119,9 @@ class KubernetesVolumeBuilder(object):
         inspector = KubernetesPodVolumeInspector(pod)
         for mount_path, sub_path, claim_name, read_only in inspector.get_mounted_persistent_volumes():
             self.add_persistent_volume_entry(mount_path, sub_path, claim_name, read_only)
-            # If the mount path is for a workspace, mount the volume to this job at the same mount path
-            if mount_path.startswith("/workspaces"): # TODO: make this more general in case prefix is changed
-                log.info("Adding volume mount for workspace data")
+            # Mount any additional volumes not already mounted, only duplicate is "calrissian-wdir"
+            if claim_name != "calrissian-wdir":
+                log.info("Adding volume mount from workspace")
                 self.add_volume_binding(mount_path, mount_path, False)
 
     def add_persistent_volume_entry(self, prefix, sub_path, claim_name, read_only):
