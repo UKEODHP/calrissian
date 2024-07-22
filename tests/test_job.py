@@ -188,18 +188,28 @@ class KubernetesVolumeBuilderTestCase(TestCase):
         self.assertEqual(0, len(self.volume_builder.emptydir_volume_names))
         with self.assertRaises(VolumeBuilderException):
             self.volume_builder.add_emptydir_volume_binding('empty-volume', '/path/to/empty')
-
+    
+    @patch('calrissian.job.KubernetesVolumeBuilder')
     @patch('calrissian.job.KubernetesPodVolumeInspector')
-    def test_add_persistent_volume_entries_from_pod(self, mock_kubernetes_pod_inspector):
+    def test_add_persistent_volume_entries_from_pod(self, mock_kubernetes_pod_inspector, mock_kubernetes_volume_builder):
         mock_kubernetes_pod_inspector.return_value.get_mounted_persistent_volumes.return_value = [
             ('/tmp/data1', None, 'data1-claim', False),
             ('/tmp/data2', '/basedir', 'data2-claim', False),
+            ('/workspaces/workspace-name', None, 'data3-claim', False),
         ]
+
+        mock_kubernetes_volume_builder.find_persistent_volume.return_value = {
+            "volume": {
+                "name": "data3-claim",
+            },
+            "prefix": "/workspaces",
+            "subpath": None,
+        }
 
         self.volume_builder.add_persistent_volume_entries_from_pod('some-pod-data')
 
         pv_entries = self.volume_builder.persistent_volume_entries
-        self.assertEqual(pv_entries.keys(), set(['/tmp/data1', '/tmp/data2']))
+        self.assertEqual(pv_entries.keys(), set(['/tmp/data1', '/tmp/data2', '/workspaces/workspace-name']))
         expected_entry1 = {
             'prefix': '/tmp/data1',
             'subPath': None,
@@ -222,12 +232,36 @@ class KubernetesVolumeBuilderTestCase(TestCase):
                 }
             }
         }
+        expected_entry3 = {
+            'prefix': '/workspaces/workspace-name',
+            'subPath': None,
+            'volume': {
+                'name': 'data3-claim',
+                'persistentVolumeClaim': {
+                    'claimName': 'data3-claim',
+                    'readOnly': False
+                }
+            }
+        }
+        expected_entry3_volume_mount = {
+            'name': 'data3-claim',
+            'mountPath': "/workspaces/workspace-name",
+            'subPath': "",
+            'readOnly': True
+        }
         self.assertEqual(pv_entries['/tmp/data1'], expected_entry1)
         self.assertEqual(pv_entries['/tmp/data2'], expected_entry2)
+        self.assertEqual(pv_entries['/workspaces/workspace-name'], expected_entry3)
+
         volumes = self.volume_builder.volumes
-        self.assertEqual(len(volumes), 2)
+        self.assertEqual(len(volumes), 3)
         self.assertEqual(volumes[0], expected_entry1['volume'])
         self.assertEqual(volumes[1], expected_entry2['volume'])
+        self.assertEqual(volumes[2], expected_entry3['volume'])
+
+        volume_mounts = self.volume_builder.volume_mounts
+        self.assertEqual(len(volume_mounts), 1)
+        self.assertEqual(volume_mounts[0], expected_entry3_volume_mount)
 
     @patch('calrissian.job.KubernetesPodVolumeInspector')
     def test_add_persistent_volume_entries_from_pod_preserves_readonly(self, mock_kubernetes_pod_inspector):
