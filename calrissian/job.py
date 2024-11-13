@@ -122,7 +122,11 @@ class KubernetesVolumeBuilder(object):
             # Mount any additional volumes not already mounted, only duplicate is "calrissian-wdir"
             if claim_name != "calrissian-wdir":
                 log.info(f"Adding PVC {claim_name} mounted at {mount_path}")
-                self.add_volume_binding(mount_path, mount_path, False)
+                # For stagein we need it to be writable
+                if claim_name == "aws-credentials":
+                    self.add_volume_binding(mount_path, mount_path, True)
+                else:
+                    self.add_volume_binding(mount_path, mount_path, False)
 
     def add_persistent_volume_entry(self, prefix, sub_path, claim_name, read_only):
         entry = {
