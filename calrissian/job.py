@@ -123,7 +123,7 @@ class KubernetesVolumeBuilder(object):
             if claim_name != "calrissian-wdir":
                 log.info(f"Adding PVC {claim_name} mounted at {mount_path}")
                 # For stagein we need it to be writable
-                if claim_name == "aws-credentials":
+                if claim_name.startswith("aws-credentials-"):
                     self.add_volume_binding(mount_path, mount_path, True)
                 else:
                     self.add_volume_binding(mount_path, mount_path, False)
